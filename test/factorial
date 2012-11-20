@@ -1,0 +1,17 @@
+#include <stdio.h>
+
+int
+main() {
+	int num;
+	int fact = 1;
+	scanf("%d", &num);
+	int aux = num;
+	if ( num < 0 ) {
+		printf("Entrada invalida\n");
+	}
+	while ( num > 0 ) {
+		fact = fact * num;
+		num  = num - 1;
+	}
+	printf("FACT(%d) = %d\n", aux, fact);
+}
