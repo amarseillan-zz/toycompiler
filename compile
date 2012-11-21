@@ -1,5 +1,5 @@
 #!/bin/bash
-bison -yd ./src/compiler.y -W -v
+bison -yd ./src/compiler.y -v
 flex ./src/parser.l
 gcc -o compiler lex.yy.c y.tab.c -ly -ll -g
 rm y.tab.* lex.yy.c
