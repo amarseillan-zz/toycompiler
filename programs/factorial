@@ -5,6 +5,7 @@ int
 main() {
 	var int num;
 	var int fact = 1;
+	printf("Ingrese un numero positivo para calcular su factorial: \n");
 	scanf("%d", &num);
 	var int aux = num;
 	if ( num < 0 ) {
@@ -14,5 +15,5 @@ main() {
 		fact = fact * num;
 		num  = num - 1;
 	}
-	printf("FACT(%d) = %d\n", aux, fact);
+	printf("El factorial de %d es %d\n", aux, fact);
 }

@@ -6,9 +6,10 @@ def int fact var int num, var char dummy;
 int
 main() {
 	var int num;
+	printf("Ingrese un numero positivo para calcular su factorial: \n");
 	scanf("%d", &num);
 	num = fact( num , 0);
-	printf("%d\n", num);
+	printf("El factorial es %d\n",num);
 }
 
 int fact( var int num, var char dummy ){
