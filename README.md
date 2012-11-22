@@ -1,17 +1,18 @@
-PARA COMPILAR PARARSE EN EL DIRECTORIO COMPILER Y EJECUTAR
-EL SCRIPT COMPILE.
-SE GENERARA EL EJECUTABLE COMPILER.
 
-PARA USAR EL COMPILADOR SE DEBE EJECUTAR EL COMANDO
+TP Nº2 TLA
+===========
 
-	> compiler input [-o output]
+Reznik, Luciana
+Marseillan, Agustín
 
-DONDE INPUT ES EL PATH AL ARCHIVO DE ENTRADA Y SE PUEDE ESPECIFICAR EL 
-ARCHIVO DE SALIDA AGREGANDO -o output, DONDE OUTPUT ES EL PATH DEL 
-ARCHIVO DE SALIDA. SI NO SE ESPECIFICA EL ARCHIVO DE SALIDA SE GENERARA 
-EL ARCHIVO out.c.
+Make
+------------------------------------------------------------------------------------------------------------------
 
-EL COMPILADOR GENERA CODIGO C LISTO PARA SER COMPILADO.
+To compile type: ./make while standing in the main directory
 
-DE ESPECIFICARSE UN ARCHIVO DE SALIDA, ESTE DEBE TENER LA EXTENSION .c PARA
-QUE LUEGO UN COMPILADOR DE C LO PUEDA ENTENDER.
+Convert
+------------------------------------------------------------------------------------------------------------------
+
+To use type:  ./c_converter input
+
+The imput should be de code in the created lenguage. Then, you should compile de C program whith gcc.
