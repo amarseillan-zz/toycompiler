@@ -13,8 +13,7 @@
 %token EQUALS_COND LT GT LE GE
 
 /* Comandos aceptados: while, if  */
-%token WHILE IF
-
+%token WHILE IF RETURN DEF
 
 
 
@@ -44,6 +43,7 @@
 %type <strval> FUNCTION_CALL
 %type <strval> P
 %type <strval> FUNCTIONS
+%type <strval> FUNCTION_DEFS
 %type <strval> FORMAL_PARAMETER
 %type <strval> FORMAL_PARAMETERS_LIST
 %type <strval> PREPROCESSOR
@@ -111,14 +111,29 @@ SymbolTable functionSymbols;
 %%
 
 
-PROGRAM:	PREPROCESSOR FUNCTIONS { fprintf(outputFile, "%s%s", $1, $2); };
+PROGRAM:	PREPROCESSOR FUNCTION_DEFS FUNCTIONS { fprintf(outputFile, "%s%s%s", $1, $2, $3); };
 PREPROCESSOR:	PREPROCESSOR PREPROCESSOR_STATEMENT { 	char * strs[2] = { $1, $2 };
 							$$ = createString(2, strs, "%s%s\n", 2); }
 		| { $$ = ""; }
 		;
+		
+FUNCTION_DEFS:  FUNCTION_DEFS DEF TYPE ID LEFT_PARENTHESIS FORMAL_PARAMETERS_LIST RIGHT_PARENTHESIS SEMI_COLON {
+			if ( !addSymbol(&functionSymbols, $4, FUNCTION) ) {
+				char * strs[2] = {"Redefining function", $4};
+				yyerror(createString(2, strs, "%s %s", 2));
+				YYABORT;
+			}
+			char * strs[5] = {$1, $3, $4, $6};
+			clearSymbolTable(&symbolTable);
+			$$ = createString(4, strs, "%s\n%s\n%s(%s);", 5);
+		}
+		| { $$ = ""; }
+		;
+						
+			
 FUNCTIONS:	FUNCTIONS TYPE ID LEFT_PARENTHESIS FORMAL_PARAMETERS_LIST RIGHT_PARENTHESIS LEFT_BRACE P RIGHT_BRACE {
-			if ( !addSymbol(&functionSymbols, $3, FUNCTION) ) {
-				char * strs[2] = { "Redefinition of", $3};
+			if ( !symbolExists(&functionSymbols, $3) ) {
+				char * strs[2] = { $3, "has no signature!"};
 				yyerror(createString(2, strs, "%s %s", 2));
 				YYABORT;
 			}
@@ -158,6 +173,10 @@ D:	FORMAL_PARAMETER	{ $$ = $1; }
                                                 YYABORT;
                                         }
                                         $$ = createString(3, strs, "%s %s = %s", 5); }
+    | RETURN ASSIGN {	char * strs[1] = {$2};
+    					$$ = createString(1, strs, "return %s", 8); }
+    | RETURN CONST {		char * strs[1] = {$2};
+    					$$ = createString(1, strs, "return %s", 8); }
 	;
 I:	ID EQUALS ASSIGN {	if ( !symbolExists(&symbolTable, $1) ) {
 					char * strs[2] = { "Missing definition of", $1 };
@@ -174,7 +193,7 @@ I:	ID EQUALS ASSIGN {	if ( !symbolExists(&symbolTable, $1) ) {
 	| FUNCTION_CALL	{ $$ = $1; }
 	;
 
-FUNCTION_CALL: 	ID LEFT_PARENTHESIS PARAM_LIST RIGHT_PARENTHESIS {  	if ( !symbolExists(&symbolTable, $1) ) {
+FUNCTION_CALL: 	ID LEFT_PARENTHESIS PARAM_LIST RIGHT_PARENTHESIS {  	if ( !symbolExists(&functionSymbols, $1) ) {
                                  					       char * strs[2] = { "Missing definition of", $1 };
 					                                       yyerror(createString(2, strs, "%s %s", 2));
 					                                       YYABORT;
