@@ -13,7 +13,7 @@
 %token EQUALS_COND LT GT LE GE
 
 /* Comandos aceptados: while, if  */
-%token WHILE IF RETURN DEF
+%token WHILE IF RETURN DEF VAR
 
 
 
@@ -41,7 +41,7 @@
 %type <strval> COND_OP
 %type <strval> CONDITION
 %type <strval> FUNCTION_CALL
-%type <strval> P
+%type <strval> VAR P
 %type <strval> FUNCTIONS
 %type <strval> FUNCTION_DEFS
 %type <strval> FORMAL_PARAMETER
@@ -117,13 +117,13 @@ PREPROCESSOR:	PREPROCESSOR PREPROCESSOR_STATEMENT { 	char * strs[2] = { $1, $2 }
 		| { $$ = ""; }
 		;
 		
-FUNCTION_DEFS:  FUNCTION_DEFS DEF TYPE ID LEFT_PARENTHESIS FORMAL_PARAMETERS_LIST RIGHT_PARENTHESIS SEMI_COLON {
+FUNCTION_DEFS:  FUNCTION_DEFS DEF TYPE ID FORMAL_PARAMETERS_LIST SEMI_COLON {
 			if ( !addSymbol(&functionSymbols, $4, FUNCTION) ) {
 				char * strs[2] = {"Redefining function", $4};
 				yyerror(createString(2, strs, "%s %s", 2));
 				YYABORT;
 			}
-			char * strs[5] = {$1, $3, $4, $6};
+			char * strs[5] = {$1, $3, $4, $5};
 			clearSymbolTable(&symbolTable);
 			$$ = createString(4, strs, "%s\n%s\n%s(%s);", 5);
 		}
@@ -147,28 +147,28 @@ FORMAL_PARAMETERS_LIST:	FORMAL_PARAMETER { $$ = $1; }
 			| FORMAL_PARAMETER COMA FORMAL_PARAMETERS_LIST { $$ = operandString($1, ", ", $3); }	
 			| { $$ = ""; }
 			;
-FORMAL_PARAMETER: TYPE ID {	if ( !addSymbol(&symbolTable, $2, stringToSymbolType($1)) ) {
-					char * strs[2] = { "Redefinition of", $2 };
+FORMAL_PARAMETER: VAR TYPE ID {	if ( !addSymbol(&symbolTable, $3, stringToSymbolType($2)) ) {
+					char * strs[2] = { "Redefinition of", $3 };
 					yyerror(createString(2, strs, "%s %s", 2));
 					YYABORT;
 				}
-				$$ = operandString($1, " ", $2); };
+				$$ = operandString($2, " ", $3); };
 P:	P I SEMI_COLON {	$$ = operandSufixString($1, "\n ", $2, ";"); }
 	| P D SEMI_COLON {  	$$ = operandSufixString($1, "\n", $2, ";"); }
 	| P CONTROL_SEQ	{	$$ = operandString($1, "\n", $2); }
 	| { $$ = ""; }
 	;
 D:	FORMAL_PARAMETER	{ $$ = $1; }
-	| TYPE ID EQUALS ASSIGN	{	char * strs[3] = {$1, $2, $4};
-					if ( !addSymbol(&symbolTable, $2, stringToSymbolType($1)) ) {
-						char * strs[2] = { "Redefinition of", $2 };
+	| VAR TYPE ID EQUALS ASSIGN	{	char * strs[3] = {$2, $3, $5};
+					if ( !addSymbol(&symbolTable, $3, stringToSymbolType($2)) ) {
+						char * strs[2] = { "Redefinition of", $3 };
 						yyerror(createString(2, strs, "%s %s", 2));
 						YYABORT;
 					}
 					$$ = createString(3, strs, "%s %s = %s", 5); }
-	| TYPE ID EQUALS CONST {	char * strs[3] = {$1, $2, $4};
-                                        if ( !addSymbol(&symbolTable, $2, stringToSymbolType($1)) ) {
-                                                char * strs[2] = { "Redefinition of", $2 };
+	| VAR TYPE ID EQUALS CONST {	char * strs[3] = {$2, $3, $5};
+                                        if ( !addSymbol(&symbolTable, $3, stringToSymbolType($2)) ) {
+                                                char * strs[2] = { "Redefinition of", $3 };
                                                 yyerror(createString(2, strs, "%s %s", 2));
                                                 YYABORT;
                                         }

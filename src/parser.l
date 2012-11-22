@@ -22,6 +22,7 @@
 "while"	return(WHILE); 
 "return" return(RETURN);
 "def"    return (DEF);
+"var"	 return(VAR);
 "=="	return(EQUALS_COND);
 "<"		return(LT);
 ">"		return(GT);
