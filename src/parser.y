@@ -55,13 +55,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
-
 extern FILE * yyin;
 extern FILE * yyout;
 extern int yylineno;
 
-FILE * outputFile = NULL;
+FILE * out_file = NULL;
 
 char * createString(int, char *[], const char *, int);
 
@@ -75,11 +73,11 @@ typedef enum {
 	CHAR,
 	INT,
 	FUNCTION
-} SymbolType;
+} Type;
 
 typedef struct Symbol {
 	char * symbol;
-	SymbolType type;
+	Type type;
 } Symbol;
 
 typedef struct SymbolTable {
@@ -88,7 +86,7 @@ typedef struct SymbolTable {
 	Symbol ** table;
 } SymbolTable;
 
-bool addSymbol(SymbolTable *, char *, SymbolType);
+bool addSymbol(SymbolTable *, char *, Type);
 
 void clearSymbolTable(SymbolTable *);
 
@@ -97,12 +95,13 @@ bool symbolExists(SymbolTable *, char *);
 char * constantMathString(char *, char *, int);
 
 
-SymbolType stringToSymbolType(char *);
+Type stringToSymbolType(char *);
 
 
 
 SymbolTable symbolTable;
 SymbolTable functionSymbols;
+
 
 %}
 
@@ -111,7 +110,7 @@ SymbolTable functionSymbols;
 %%
 
 
-PROGRAM:	PREPROCESSOR FUNCTION_DEFS FUNCTIONS { fprintf(outputFile, "%s%s%s", $1, $2, $3); };
+PROGRAM:	PREPROCESSOR FUNCTION_DEFS FUNCTIONS { fprintf(out_file, "%s%s%s", $1, $2, $3); };
 PREPROCESSOR:	PREPROCESSOR PREPROCESSOR_STATEMENT { 	char * strs[2] = { $1, $2 };
 							$$ = createString(2, strs, "%s%s\n", 2); }
 		| { $$ = ""; }
@@ -346,7 +345,7 @@ initTable(SymbolTable *  symbolTable) {
 }
 
 bool
-addSymbol(SymbolTable * symbolTable, char * symbol, SymbolType type) {
+addSymbol(SymbolTable * symbolTable, char * symbol, Type type) {
 	if ( symbolExists(symbolTable, symbol) ) {
 		return false;
 	}
@@ -378,7 +377,7 @@ clearSymbolTable(SymbolTable * symbolTable) {
 	symbolTable->size = 0;
 }
 
-SymbolType
+Type
 stringToSymbolType(char * string) {
 	if ( !strcmp(string, "char") ) {
 		return CHAR;
@@ -391,51 +390,46 @@ stringToSymbolType(char * string) {
 
 int main(int argc, char * argv[]) {
 
-	char * outputFileName = NULL, * inputFileName = NULL;
-	FILE * inputFile;
-	if ( argc >= 2 ) {
-		int i;
-		for ( i = 1 ; i < argc ; i++ ) {
-			if ( !strcmp(argv[i], "-o") ) {
-				if ( i + 1 < argc ) {
-					outputFileName = argv[i+1];
-					i++;
-				} else {
-					printf("Missing file name\n");
-					return 1;
-				}
-			} else {
-				if ( inputFileName == NULL ) {
-					inputFileName = argv[i];
-				} else {
-					printf("Unknown parameter %s\n", argv[i]);
-					return 1;
-				}
-			}
-		}
-		if ( outputFileName == NULL ) {
-			outputFileName = "./out.c";
-		}
-	} else {
+	char * out = NULL, * in = NULL;
+
+	FILE * in_file;
+	
+	if(argc > 1){
+
+		in = argv[1];
+		char name[50]={0};
+		char new_name[50]={0};
+		sscanf(in,"programs/%s",name);
+		sprintf(new_name, "./%s.c",name);
+		out=new_name;
+	
+	}
+	else {
+
 		printf("Input file missing\n");
 		return 1;
 	}
-	
-	outputFile = fopen(outputFileName, "w");
-	if ( outputFile == NULL ) {
+
+	out_file = fopen(out, "w");
+	if ( out_file == NULL ) {
 		printf("Couldn't open output file\n");
 		return 1;
 	}
-	inputFile = fopen(inputFileName, "r");
-	if ( inputFile == NULL ) {
+	yyout = out_file;
+	
+	in_file = fopen(in, "r");
+	if ( in_file == NULL ) {
 		printf("Couldn't open input file\n");
 		return 1;
 	}
-	yyin = inputFile;
-	yyout = outputFile;
+	yyin = in_file;
+
+
 	initTable(&symbolTable);
 	initTable(&functionSymbols);
+	
 	yyparse();
-	fclose(inputFile);
-	fclose(outputFile);
+	
+	fclose(in_file);
+	fclose(out_file);
 }
