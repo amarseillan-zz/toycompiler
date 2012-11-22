@@ -20,6 +20,8 @@
 "="	return(EQUALS);
 "if"	return(IF);
 "while"	return(WHILE); 
+"return" return(RETURN);
+"def"    return (DEF);
 "=="	return(EQUALS_COND);
 "<"	return(LT);
 ">"	return(GT);
