@@ -2,21 +2,37 @@
 	char * strval;
 }
 
+/* Inicio de todo */
+%start PROGRAM
 
+
+/* Simbolos aceptados: ; , = ( ) [ ] */
 %token SEMI_COLON COMA EQUALS LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_BRACE RIGHT_BRACE
-%token EQUALS_COND LT GT LE GE
-%token WHILE IF RETURN DEF VAR
-%token <strval> CONST
-%token <strval> ID
-%token <strval> TYPE
-%token PLUS MINUS TIMES DIVIDE
-%token <strval> IO_CALL
-%token <strval> PREPROCESSOR_STATEMENT
 
+/* Simbolos aceptados: == < > >= <=  */
+%token EQUALS_COND LT GT LE GE
+
+/* Comandos aceptados: while, if  */
+%token WHILE IF RETURN DEF VAR
+
+
+
+/* Simbolos aceptados: + - * /  */
+%token PLUS MINUS TIMES DIVIDE
+
+
+/* Precedencias  */
 
 %left PLUS MINUS TIMES DIVIDE CONST
 
-%start PROGRAM
+
+%token <strval> CONST
+%token <strval> ID
+%token <strval> TYPE
+
+%token <strval> IO_CALL
+%token <strval> PREPROCESSOR_STATEMENT
+
 %type <strval> I
 %type <strval> D
 %type <strval> CONTROL_SEQ
@@ -34,6 +50,7 @@
 
 
 %{
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -373,6 +390,7 @@ stringToSymbolType(char * string) {
 }
 
 int main(int argc, char * argv[]) {
+
 	char * outputFileName = NULL, * inputFileName = NULL;
 	FILE * inputFile;
 	if ( argc >= 2 ) {
