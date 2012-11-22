@@ -3,19 +3,16 @@ def int main;
 
 int
 main() {
-
-	int num;
-	int fac = 1;
-	printf("Ingrese un número positivo para calcular el factorial:\n");
-
+	var int num;
+	var int fact = 1;
 	scanf("%d", &num);
 	var int aux = num;
 	if ( num < 0 ) {
-		printf("El número debe ser mayor a 0\n");
+		printf("Entrada invalida\n");
 	}
 	while ( num > 0 ) {
-		fac = fac * num;
+		fact = fact * num;
 		num  = num - 1;
 	}
-	printf("El factorial de %d es %d\n", aux, fac);
+	printf("FACT(%d) = %d\n", aux, fact);
 }
