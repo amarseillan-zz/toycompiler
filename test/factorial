@@ -1,11 +1,12 @@
 #include <stdio.h>
+def int main;
 
 int
 main() {
-	int num;
-	int fact = 1;
+	var int num;
+	var int fact = 1;
 	scanf("%d", &num);
-	int aux = num;
+	var int aux = num;
 	if ( num < 0 ) {
 		printf("Entrada invalida\n");
 	}
