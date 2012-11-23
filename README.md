@@ -15,4 +15,5 @@ Convert
 
 To use type:  ./c_converter input
 
-The imput should be de code in the created lenguage. Then, you should compile de C program whith gcc.
+The imput should be de code in the created lenguage. A .c file will be created with the same name than the imput.
+Then, you should compile de C program whith gcc to get the executable.
