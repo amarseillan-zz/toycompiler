@@ -123,8 +123,14 @@ INCLUDES:	INCLUDES INCLUDE { 		$$ = concat_str(3,$1,$2,"\n");}
 		
 FUNC_DEF:  	FUNC_DEF DEF TYPE NAME PARAM_DEFS END_OF_LINE {
 
-				if ( !addSymbol(&functionSymbols, $4, FUNCTION) )
-					yyerror(concat_str(2, "Redefining function ",$4));		
+				if ( !addSymbol(&functionSymbols, $4, FUNCTION) ) {
+
+					yyerror(concat_str(2, "Redefining function ",$4));
+					YYABORT;
+
+				}
+
+			
 
 				clearSymbolTable(&symbolTable);
 
@@ -142,8 +148,10 @@ FUNC_DEF:  	FUNC_DEF DEF TYPE NAME PARAM_DEFS END_OF_LINE {
 			
 FUNC:		FUNC TYPE NAME OPEN_PARENTHESIS PARAM_DEFS CLOSE_PARENTHESIS OPEN_BRACE LINE CLOSE_BRACE {
 
-			if ( !symbolExists(&functionSymbols, $3) )
-				yyerror(concat_str(2, $3, " has no signature!"));	
+			if ( !symbolExists(&functionSymbols, $3) ) {
+				yyerror(concat_str(2, $3, " has no signature!"));
+				YYABORT;
+			}
 
 				clearSymbolTable(&symbolTable);
 				$$=concat_str(12 ,$1,"\n",$2,"\n",$3,"(",$5,") {","\n",$8,"\n","}");
@@ -161,9 +169,10 @@ PARAM_DEFS:	PARAM { $$ = $1; }
 
 PARAM: 		VAR TYPE NAME {	
 
-				if ( !addSymbol(&symbolTable, $3, stringToSymbolType($2)) )
+				if ( !addSymbol(&symbolTable, $3, stringToSymbolType($2)) ) {
 					yyerror(concat_str(2, "Redefinition of ",$3));
-				
+					YYABORT;
+				}
 				$$ = concat_str(4,$2, " ", $3); 
 				}
 ;
@@ -177,20 +186,24 @@ LINE: 		LINE PROCESS END_OF_LINE 	{	$$ = concat_str(4,$1,"\n ",$2,";"); 	}
 DECLARE:	PARAM			{ $$ = $1; }
 
 			| VAR TYPE NAME EQUALS VAL	{	
-								
-								if ( !addSymbol(&symbolTable, $3, stringToSymbolType($2)) )
-									yyerror(concat_str(2, "Redefinition of ",$3));
-									
+					
+					if ( !addSymbol(&symbolTable, $3, stringToSymbolType($2)) ) {
 
-								$$ = concat_str(5, $2," ",$3," = ",$5); 
+						yyerror(concat_str(2, "Redefinition of ",$3));
+						YYABORT;
+					}
+
+					$$ = concat_str(5, $2," ",$3," = ",$5); 
 			}
 
 			| VAR TYPE NAME EQUALS CONST {	
                      
-                    			if ( !addSymbol(&symbolTable, $3, stringToSymbolType($2)) )
-                           			 yyerror(concat_str(2, "Redefinition of ",$3));
-
-								$$ = concat_str(5, $2," ",$3," = ",$5); 
+                    if ( !addSymbol(&symbolTable, $3, stringToSymbolType($2)) ) {
+                            
+                            yyerror(concat_str(2, "Redefinition of ",$3));
+                            YYABORT;
+                    }
+					$$ = concat_str(5, $2," ",$3," = ",$5); 
 			}
 
  		   | RETURN VAL 	{	$$ = concat_str(2,"return ",$2); }
@@ -200,32 +213,40 @@ DECLARE:	PARAM			{ $$ = $1; }
 
 PROCESS: 	NAME EQUALS VAL {	
 
-								if ( !symbolExists(&symbolTable, $1) ) 
-									yyerror(concat_str(2, "Missing definition of ",$1));
-				
-								$$ = concat_str(3,$1, " = ", $3); 
+					if ( !symbolExists(&symbolTable, $1) ) {
+					
+						yyerror(concat_str(2, "Missing definition of ",$1));
+						YYABORT;
+					}
+
+					$$ = concat_str(3,$1, " = ", $3); 
 			}
 
 			| NAME EQUALS CONST {	
 
-								if ( !symbolExists(&symbolTable, $1) ) 
-			                         yyerror(concat_str(2, "Missing definition of ",$1));
-			                        
-			                                	
-			                    $$ = concat_str(3,$1, " = ", $3); 
+					if ( !symbolExists(&symbolTable, $1) ) {
+                                		
+                     	yyerror(concat_str(2, "Missing definition of ",$1));
+                        YYABORT;
+                    }
+                                	
+                    $$ = concat_str(3,$1, " = ", $3); 
              }
 
-			| IO_CALL 		{	$$ = $1; }
+			| IO_CALL 					{ $$ = $1; }
 ;
 
 CALL: 		NAME OPEN_PARENTHESIS PARAM_USES CLOSE_PARENTHESIS {  	
 
-								if ( !symbolExists(&functionSymbols, $1) ) 
-			                    	yyerror(concat_str(2, "Missing definition of ",$1));
-			                    
-								$$ = concat_str(4,$1,"(",$3,")");}
+					if ( !symbolExists(&functionSymbols, $1) ) {
+                                 		
+                    	yyerror(concat_str(2, "Missing definition of ",$1));
+                        YYABORT;
+					}
+
+					$$ = concat_str(4,$1,"(",$3,")");}
 									
-			| IO_CALL 		{	$$ = $1; }
+			| IO_CALL 					{ $$ = $1; }
 ;
 
 
@@ -240,14 +261,16 @@ PARAM_USES:
 
 VAL:		NAME	{	
 
-					if ( !symbolExists(&symbolTable, $1) )
-						yyerror(concat_str(2, "Missing definition of ",$1));
-                		
+					if ( !symbolExists(&symbolTable, $1) ) {
 				
-					$$ = $1; }
+						yyerror(concat_str(2, "Missing definition of ",$1));
+                		YYABORT;
+					} 
+				
+				$$ = $1; }
 
 			| OPEN_PARENTHESIS VAL CLOSE_PARENTHESIS	{ 	
-								  	  $$ = concat_str(3,"( ","$2"," )"); 	}
+						  	  $$ = concat_str(3,"( ","$2"," )"); 	}
 			| VAL PLUS VAL			{ $$ = concat_str(3, $1, " + ", $3); 	}
 			| VAL PLUS CONST		{ $$ = concat_str(3,$1, " + ", $3);	 	}
 			| CONST PLUS VAL		{ $$ = concat_str(3,$1, " + ", $3); 	}
@@ -375,7 +398,6 @@ math_operation(int op1, int op2, int mathOp) {
 
 int yyerror(char *s) {
 	fprintf(stderr, "%d: %s\n", yylineno, s);
-	YYABORT;
 }
 
 #define TABLE_MAXSIZE_MULT 10
