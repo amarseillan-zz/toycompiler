@@ -234,6 +234,7 @@ PROCESS: 	NAME EQUALS VAL {
              }
 
 			| IO_CALL 					{ $$ = $1; }
+			| VAL { $$ = $1; }
 ;
 
 CALL: 		NAME OPEN_PARENTHESIS PARAM_USES CLOSE_PARENTHESIS {  	
