@@ -11,19 +11,13 @@
 
 [[:blank:]\n]	;
 ^#.*	{ yylval.strval=strdup(yytext); return(PREPROCESSOR_STATEMENT);}
-"("		return(LEFT_PARENTHESIS);
-")"		return(RIGHT_PARENTHESIS);
-"{"		return(LEFT_BRACE);
-"}"		return(RIGHT_BRACE);
-","		return(COMA);
-";"		return(SEMI_COLON);
-"="		return(EQUALS);
+
 "if"	return(IF);
 "while"	return(WHILE); 
 "return" return(RETURN);
 "def"    return (DEF);
 "var"	 return(VAR);
-"=="	return(EQUALS_COND);
+"=="	return(EQUIV);
 "<"		return(LT);
 ">"		return(GT);
 "<="	return(LE);
@@ -32,6 +26,13 @@
 "-"		return(MINUS);
 "*"		return(TIMES);
 "/"		return(DIVIDE);
+"("		return(LEFT_PARENTHESIS);
+")"		return(RIGHT_PARENTHESIS);
+"{"		return(LEFT_BRACE);
+"}"		return(RIGHT_BRACE);
+","		return(COMA);
+";"		return(END_OF_LINE);
+"="		return(EQUALS);
 
 printf(.*)	{ return frontend(); }
 scanf(.*)	{ return frontend(); }
@@ -41,7 +42,7 @@ char {yylval.strval=strdup(yytext); return(TYPE); }
 
 
 [[:digit:]]+	{ yylval.strval=strdup(yytext); return(CONST);}
-[_[:alpha:]][_[:alnum:]]*	{yylval.strval=strdup(yytext);return(ID);}
+[_[:alpha:]][_[:alnum:]]*	{yylval.strval=strdup(yytext);return(NAME);}
 
 .	printf("PUNTO + %s\n", yytext);
 
