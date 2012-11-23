@@ -31,7 +31,7 @@
 %token <strval> TYPE
 
 %token <strval> IO_CALL
-%token <strval> PREPROCESSOR_STATEMENT
+%token <strval> INCLUDE
 
 %type <strval> PROCESS
 %type <strval> DECLARE
@@ -47,7 +47,7 @@
 %type <strval> VAR
 %type <strval> FUNC
 %type <strval> FUNC_DEF
-%type <strval> PREPROCESSOR
+%type <strval> INCLUDES
 
 
 %{
@@ -107,9 +107,9 @@ SymbolTable functionSymbols;
 %%
 
 
-PROGRAM:	PREPROCESSOR FUNC_DEF FUNC { fprintf(out_file, "%s%s%s", $1, $2, $3); };
+PROGRAM:	INCLUDES FUNC_DEF FUNC { fprintf(out_file, "%s%s%s", $1, $2, $3); };
 
-PREPROCESSOR:	PREPROCESSOR PREPROCESSOR_STATEMENT { 	
+INCLUDES:	INCLUDES INCLUDE { 	
 
 	char * strs[2] = { $1, $2 };
 	$$ = concat(2, strs, "%s%s\n", 2);

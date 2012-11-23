@@ -1,6 +1,5 @@
 #include <stdio.h>
 def int main;
-def int dummy2;
 
 int
 main() {
@@ -17,10 +16,5 @@ main() {
 		num  = num - 1;
 	}
 	printf("El factorial de %d es %d\n", aux, fact);
-	dummy2();
 }
 
-int
-dummy2(){
-	return 0;
-}

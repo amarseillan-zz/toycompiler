@@ -10,7 +10,7 @@
 %%
 
 [[:blank:]\n]	;
-^#.*	{ yylval.strval=strdup(yytext); return(PREPROCESSOR_STATEMENT);}
+^#.*	{ yylval.strval=strdup(yytext); return(INCLUDE);}
 
 "if"	return(IF);
 "while"	return(WHILE); 
