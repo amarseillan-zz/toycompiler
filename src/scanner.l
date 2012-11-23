@@ -8,6 +8,7 @@
 
 ^#.*	{ yylval.strval=strdup(yytext); return(INCLUDE);}
 
+
 "if"		return(IF);
 "while"		return(WHILE); 
 "return" 	return(RETURN);
@@ -31,6 +32,7 @@
 "="			return(EQUALS);
 
 [[:blank:]\n]	;
+
 
 
 printf(.*)	{ return frontend(); }
