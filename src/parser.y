@@ -232,9 +232,7 @@ PROCESS: 	NAME EQUALS VAL {
                                 	
                     $$ = concat_str(3,$1, " = ", $3); 
              }
-
-			| IO_CALL 					{ $$ = $1; }
-			| VAL { $$ = $1; }
+			| CALL { $$ = $1; }
 ;
 
 CALL: 		NAME OPEN_PARENTHESIS PARAM_USES CLOSE_PARENTHESIS {  	
