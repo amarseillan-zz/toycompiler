@@ -256,7 +256,7 @@ PARAM_USES:
 			| CONST 					{ $$ = $1; }
 			| CONST COMA PARAM_USES 	{ $$ = concat_str(4,$1, ", ", $3); }
 			| VAL COMA PARAM_USES 		{ $$ = concat_str(4,$1, ", ", $3); }
-			{ $$ = ""; }
+			| { $$ = ""; }
 ;
 
 VAL:		NAME	{	
