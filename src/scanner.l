@@ -26,10 +26,10 @@
 "-"		return(MINUS);
 "*"		return(TIMES);
 "/"		return(DIVIDE);
-"("		return(LEFT_PARENTHESIS);
-")"		return(RIGHT_PARENTHESIS);
-"{"		return(LEFT_BRACE);
-"}"		return(RIGHT_BRACE);
+"("		return(OPEN_PARENTHESIS);
+")"		return(CLOSE_PARENTHESIS);
+"{"		return(OPEN_BRACE);
+"}"		return(CLOSE_BRACE);
 ","		return(COMA);
 ";"		return(END_OF_LINE);
 "="		return(EQUALS);

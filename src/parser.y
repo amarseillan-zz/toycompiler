@@ -7,7 +7,7 @@
 
 
 /* Simbolos aceptados: ; , = ( ) [ ] */
-%token END_OF_LINE COMA EQUALS LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_BRACE RIGHT_BRACE
+%token END_OF_LINE COMA EQUALS OPEN_PARENTHESIS CLOSE_PARENTHESIS OPEN_BRACE CLOSE_BRACE
 
 /* Simbolos aceptados: == < > >= <=  */
 %token EQUIV LT GT LE GE
@@ -33,19 +33,20 @@
 %token <strval> IO_CALL
 %token <strval> PREPROCESSOR_STATEMENT
 
-%type <strval> I
-%type <strval> D
+%type <strval> PROCESS
+%type <strval> DECLARE
 %type <strval> CONTROL
 %type <strval> VAL
-%type <strval> PARAM_LIST
+%type <strval> PARAM
+%type <strval> PARAM_USES
+%type <strval> PARAM_DEFS
 %type <strval> COND_OP
 %type <strval> CONDITION
 %type <strval> CALL
-%type <strval> VAR P
+%type <strval> LINE
+%type <strval> VAR
 %type <strval> FUNC
 %type <strval> FUNC_DEF
-%type <strval> PARAM
-%type <strval> PARAMETERS
 %type <strval> PREPROCESSOR
 
 
@@ -117,7 +118,7 @@ PREPROCESSOR:	PREPROCESSOR PREPROCESSOR_STATEMENT {
 	$$ = ""; 
 };
 		
-FUNC_DEF:  FUNC_DEF DEF TYPE NAME PARAMETERS END_OF_LINE {
+FUNC_DEF:  FUNC_DEF DEF TYPE NAME PARAM_DEFS END_OF_LINE {
 
 			if ( !addSymbol(&functionSymbols, $4, FUNCTION) ) {
 
@@ -137,7 +138,7 @@ FUNC_DEF:  FUNC_DEF DEF TYPE NAME PARAMETERS END_OF_LINE {
 		;
 						
 			
-FUNC:	FUNC TYPE NAME LEFT_PARENTHESIS PARAMETERS RIGHT_PARENTHESIS LEFT_BRACE P RIGHT_BRACE {
+FUNC:	FUNC TYPE NAME OPEN_PARENTHESIS PARAM_DEFS CLOSE_PARENTHESIS OPEN_BRACE LINE CLOSE_BRACE {
 			if ( !symbolExists(&functionSymbols, $3) ) {
 				char * strs[2] = { $3, "has no signature!"};
 				yyerror(concat(2, strs, "%s %s", 2));
@@ -150,8 +151,8 @@ FUNC:	FUNC TYPE NAME LEFT_PARENTHESIS PARAMETERS RIGHT_PARENTHESIS LEFT_BRACE P 
 		| { $$ = ""; }
 		;
 
-PARAMETERS:	PARAM { $$ = $1; }
-			| PARAM COMA PARAMETERS { $$ = print_op($1, ", ", $3); }	
+PARAM_DEFS:	PARAM { $$ = $1; }
+			| PARAM COMA PARAM_DEFS { $$ = print_op($1, ", ", $3); }	
 			| { $$ = ""; }
 			;
 
@@ -162,33 +163,33 @@ PARAM: VAR TYPE NAME {	if ( !addSymbol(&symbolTable, $3, stringToSymbolType($2))
 				}
 				$$ = print_op($2, " ", $3); };
 
-P:	P I END_OF_LINE {	$$ = concat_op($1, "\n ", $2, ";"); }
-	| P D END_OF_LINE {  	$$ = concat_op($1, "\n", $2, ";"); }
-	| P CONTROL	{	$$ = print_op($1, "\n", $2); }
+LINE: LINE PROCESS END_OF_LINE {	$$ = concat_op($1, "\n ", $2, ";"); }
+	| LINE DECLARE END_OF_LINE {  	$$ = concat_op($1, "\n", $2, ";"); }
+	| LINE CONTROL	{	$$ = print_op($1, "\n", $2); }
 	| { $$ = ""; }
 	;
 
-D:	PARAM	{ $$ = $1; }
-	| VAR TYPE NAME EQUALS VAL	{	char * strs[3] = {$2, $3, $5};
+DECLARE:	PARAM	{ $$ = $1; }
+			| VAR TYPE NAME EQUALS VAL	{	char * strs[3] = {$2, $3, $5};
 					if ( !addSymbol(&symbolTable, $3, stringToSymbolType($2)) ) {
 						char * strs[2] = { "Redefinition of", $3 };
 						yyerror(concat(2, strs, "%s %s", 2));
 						YYABORT;
 					}
 					$$ = concat(3, strs, "%s %s = %s", 5); }
-	| VAR TYPE NAME EQUALS CONST {	char * strs[3] = {$2, $3, $5};
+			| VAR TYPE NAME EQUALS CONST {	char * strs[3] = {$2, $3, $5};
                                         if ( !addSymbol(&symbolTable, $3, stringToSymbolType($2)) ) {
                                                 char * strs[2] = { "Redefinition of", $3 };
                                                 yyerror(concat(2, strs, "%s %s", 2));
                                                 YYABORT;
                                         }
                                         $$ = concat(3, strs, "%s %s = %s", 5); }
-    | RETURN VAL {	char * strs[1] = {$2};
+ 		   | RETURN VAL {	char * strs[1] = {$2};
     					$$ = concat(1, strs, "return %s", 8); }
-    | RETURN CONST {		char * strs[1] = {$2};
+  		   | RETURN CONST {		char * strs[1] = {$2};
     					$$ = concat(1, strs, "return %s", 8); }
 	;
-I:	NAME EQUALS VAL {	if ( !symbolExists(&symbolTable, $1) ) {
+PROCESS: NAME EQUALS VAL {	if ( !symbolExists(&symbolTable, $1) ) {
 					char * strs[2] = { "Missing definition of", $1 };
 					yyerror(concat(2, strs, "%s %s", 2));
 					YYABORT;
@@ -203,7 +204,7 @@ I:	NAME EQUALS VAL {	if ( !symbolExists(&symbolTable, $1) ) {
 	| CALL	{ $$ = $1; }
 	;
 
-CALL: 	NAME LEFT_PARENTHESIS PARAM_LIST RIGHT_PARENTHESIS {  	if ( !symbolExists(&functionSymbols, $1) ) {
+CALL: 	NAME OPEN_PARENTHESIS PARAM_USES CLOSE_PARENTHESIS {  	if ( !symbolExists(&functionSymbols, $1) ) {
                                  					       char * strs[2] = { "Missing definition of", $1 };
 					                                       yyerror(concat(2, strs, "%s %s", 2));
 					                                       YYABORT;
@@ -213,10 +214,10 @@ CALL: 	NAME LEFT_PARENTHESIS PARAM_LIST RIGHT_PARENTHESIS {  	if ( !symbolExists
 		| IO_CALL { $$ = $1; }
 		;
 
-PARAM_LIST:	VAL	{ $$ = $1; }
+PARAM_USES:	VAL	{ $$ = $1; }
 		| CONST { $$ = $1; }
-		| CONST COMA PARAM_LIST { $$ = print_op($1, ", ", $3); }
-		| VAL COMA PARAM_LIST { $$ = print_op($1, ", ", $3); }
+		| CONST COMA PARAM_USES { $$ = print_op($1, ", ", $3); }
+		| VAL COMA PARAM_USES { $$ = print_op($1, ", ", $3); }
 		;
 VAL:	NAME	{	if ( !symbolExists(&symbolTable, $1) ) {
 				char * strs[2] = { "Missing definition of", $1 };
@@ -224,32 +225,32 @@ VAL:	NAME	{	if ( !symbolExists(&symbolTable, $1) ) {
 				YYABORT;
 			} 
 			$$ = $1; }
-	| LEFT_PARENTHESIS VAL RIGHT_PARENTHESIS	{ 	char * strs[1] = {$2}; 
+	| OPEN_PARENTHESIS VAL CLOSE_PARENTHESIS	{ 	char * strs[1] = {$2}; 
 						$$ = concat(1, strs, "( %s )", 4); }
 	| VAL PLUS VAL	{ $$ = print_op($1, " + ", $3); }
-	| VAL MINUS VAL 	{ $$ = print_op($1, " - ", $3); }
-	| VAL TIMES VAL	{ $$ = print_op($1, " * ", $3); }
-	| VAL DIVIDE VAL	{ $$ = print_op($1, " / ", $3); }
 	| VAL PLUS CONST	{ $$ = print_op($1, " + ", $3); }
-	| VAL MINUS CONST	{ $$ = print_op($1, " - ", $3); }
-	| VAL TIMES CONST	{ $$ = print_op($1, " * ", $3); }
-	| VAL DIVIDE CONST	{ $$ = print_op($1, " / ", $3); }
 	| CONST PLUS VAL	{ $$ = print_op($1, " + ", $3); }
-	| CONST MINUS VAL	{ $$ = print_op($1, " - ", $3); }
-	| CONST TIMES VAL	{ $$ = print_op($1, " * ", $3); }
-	| CONST DIVIDE VAL	{ $$ = print_op($1, " / ", $3); }
 	| CONST PLUS CONST	{ $$ = math_operation($1, $3, PLUS); }
+	| VAL MINUS VAL 	{ $$ = print_op($1, " - ", $3); }
+	| VAL MINUS CONST	{ $$ = print_op($1, " - ", $3); }
+	| CONST MINUS VAL	{ $$ = print_op($1, " - ", $3); }
 	| CONST MINUS CONST	{ $$ = math_operation($1, $3, MINUS); }
+	| VAL TIMES VAL	{ $$ = print_op($1, " * ", $3); }
+	| VAL TIMES CONST	{ $$ = print_op($1, " * ", $3); }
+	| CONST TIMES VAL	{ $$ = print_op($1, " * ", $3); }
 	| CONST TIMES CONST	{ $$ = math_operation($1, $3, TIMES); }
+	| VAL DIVIDE VAL	{ $$ = print_op($1, " / ", $3); }
+	| VAL DIVIDE CONST	{ $$ = print_op($1, " / ", $3); }
+	| CONST DIVIDE VAL	{ $$ = print_op($1, " / ", $3); }
 	| CONST DIVIDE CONST	{ $$ = math_operation($1, $3, DIVIDE); }
 	| CALL 	{ $$ = $1; }
 	;
-CONTROL:	IF LEFT_PARENTHESIS CONDITION RIGHT_PARENTHESIS LEFT_BRACE P RIGHT_BRACE {	
+CONTROL:	IF OPEN_PARENTHESIS CONDITION CLOSE_PARENTHESIS OPEN_BRACE LINE CLOSE_BRACE {	
 				char * str = malloc(strlen($3) + strlen($6) + 13);
 				sprintf(str, "if ( %s ) {\n%s\n}", $3, $6);
 				$$ = str; }
 												
-		| WHILE LEFT_PARENTHESIS CONDITION RIGHT_PARENTHESIS LEFT_BRACE P RIGHT_BRACE {
+		| WHILE OPEN_PARENTHESIS CONDITION CLOSE_PARENTHESIS OPEN_BRACE LINE CLOSE_BRACE {
 				char * str = malloc(strlen($3) + strlen($6) + 16);
 				sprintf(str, "while ( %s ) {\n%s\n}", $3, $6);
 				$$ = str; }
