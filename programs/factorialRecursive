@@ -1,6 +1,7 @@
 #include <stdio.h>
 def int main;
 def int fact var int num, var char dummy;
+def char dummy2;
 
 
 int
@@ -10,6 +11,7 @@ main() {
 	scanf("%d", &num);
 	num = fact( num , 0);
 	printf("El factorial es %d\n",num);
+	dummy2();
 }
 
 int fact( var int num, var char dummy ){

@@ -17,6 +17,7 @@
 "return" return(RETURN);
 "def"    return (DEF);
 "var"	 return(VAR);
+"void"	return(VOID);
 "=="	return(EQUIV);
 "<"		return(LT);
 ">"		return(GT);

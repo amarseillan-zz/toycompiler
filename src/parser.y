@@ -13,7 +13,7 @@
 %token EQUIV LT GT LE GE
 
 /* Comandos aceptados: while, if  */
-%token WHILE IF RETURN DEF VAR
+%token WHILE IF RETURN DEF VAR VOID
 
 
 
@@ -37,6 +37,7 @@
 %type <strval> DECLARE
 %type <strval> CONTROL
 %type <strval> VAL
+%type <strval> VOID
 %type <strval> PARAM
 %type <strval> PARAM_USES
 %type <strval> PARAM_DEFS
@@ -218,6 +219,7 @@ PARAM_USES:	VAL	{ $$ = $1; }
 		| CONST { $$ = $1; }
 		| CONST COMA PARAM_USES { $$ = print_op($1, ", ", $3); }
 		| VAL COMA PARAM_USES { $$ = print_op($1, ", ", $3); }
+		| { $$ = ""; }
 		;
 VAL:	NAME	{	if ( !symbolExists(&symbolTable, $1) ) {
 				char * strs[2] = { "Missing definition of", $1 };
