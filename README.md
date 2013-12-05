@@ -1,9 +1,14 @@
-
-TP Nº2 TLA
+Automatons and Language Theory @ ITBA (Buenos Aires Institute of Technology)
 ===========
 
-Reznik, Luciana
-Marseillan, Agustín
+ + Reznik, Luciana
+ + Marseillan, Agustín
+
+Description
+===========
+Implementation of a simple language parser and compiler for a defined gramatic.
+We've done basic code optimizations at compilance level and solved the "hangling else" problem.
+
 
 Make
 ------------------------------------------------------------------------------------------------------------------
@@ -15,5 +20,6 @@ Convert
 
 To use type:  ./c_converter input
 
-The imput should be de code in the created lenguage. A .c file will be created with the same name than the imput.
+The input should be the code in the created language. A .c file will be created with the same name than the input.
 Then, you should compile de C program whith gcc to get the executable.
+
